@@ -70,7 +70,7 @@ const AdminPanel = () => {
           .map((user,index) => (
             <motion.div key={user.id} className="user-card" initial={{opacity:0,y:50}}
             animate={{opacity:1,y:0}}
-            transition={{delay: search === "" ? index*0.1 : 0,duration:0.3}}>
+            transition={{delay: 0,duration:0.3}}>
               <h2 className="user-name">{user.username}</h2>
               <p className="user-score">Score: {user.total_points}</p>
               {search == "" ? 
