@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { auth, db } from "./Dbconfig/firebaseConfig"; // Ensure Firebase is initialized here
-import { collection, getDocs, updateDoc, doc } from "firebase/firestore";
+import { collection, getDocs, updateDoc, doc, orderBy, query } from "firebase/firestore";
 import { motion } from "framer-motion";
 import "./panel.css"; // Import the CSS file
 import { signOut } from "firebase/auth";
@@ -13,9 +13,18 @@ const AdminPanel = () => {
   const navigate = useNavigate();
   useEffect(() => {
     const fetchUsers = async () => {
-      const querySnapshot = await getDocs(collection(db, "pointsTable"));
-      const userData = querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-      setUsers(userData);
+      try {
+        const pointsCollection = collection(db, "pointsTable");
+        const q = query(pointsCollection, orderBy("total_points", "desc"));
+        const querySnapshot = await getDocs(q);
+        let users = [];
+        querySnapshot.forEach((docSnap) => {
+          users.push({ id: docSnap.id, ...docSnap.data() });
+        });
+        setUsers(users);
+      } catch (error) {
+        console.error('Failed to fetch users:', error);
+      }
     };
     fetchUsers();
   }, []);
@@ -70,7 +79,7 @@ const AdminPanel = () => {
           .map((user,index) => (
             <motion.div key={user.id} className="user-card" initial={{opacity:0,y:50}}
             animate={{opacity:1,y:0}}
-            transition={{delay:index*0.1,duration:0.3}}>
+            transition={{delay: 0,duration:0.3}}>
               <h2 className="user-name">{user.username}</h2>
               <p className="user-score">Score: {user.total_points}</p>
               {search == "" ? 
